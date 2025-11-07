@@ -1,7 +1,7 @@
 library(mongolite)
 
 # Connecting to MongoDB for GitHub actions
-connect_mongo <- function(collection_name, user = "root", pass = "password", host = "aml-bet_db:27017") {
+connect_mongo <- function(collection_name, user = "root", pass = "password", host = "localhost:27017") {
  uri <- sprintf("mongodb://%s:%s@%s/", user, pass, host)
  return (mongo(url = uri, db = "aml-bet", collection = collection_name))
 
