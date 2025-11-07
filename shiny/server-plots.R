@@ -8,6 +8,7 @@ plotMultiple <- function() {
   forest_plot <- query_mongo_forest(input$inputGene, datasets = "all")
   
   output$riskPlots <- renderUI({
+    if (all(is.na(plots))) {h1("No risk data to display.")}
     lapply(1:length(plots), function(i) {
       if (is.na(plots[[i]][1])) (return())
       id <- paste0("risk_", i)
@@ -22,6 +23,7 @@ plotMultiple <- function() {
   })
   
   output$survPlots <- renderUI({
+    if (all(is.na(plots_km))) {h1("No survival data to display.")}
     lapply(1:length(plots_km), function(i) {
       if (is.na(plots_km[[i]][1])) (return())
       id <- paste0("surv_", i)
@@ -36,6 +38,7 @@ plotMultiple <- function() {
   })
   
   output$forestPlots <- renderUI({
+    if (all(is.na(forest_plot))) {h1("No survival data to display.")}
     rendered_forest_plot <- shinycssloaders::withSpinner(plotOutput("forest_1"))
     output[["forest_1"]] <- renderPlot({
       forest_plot

@@ -172,7 +172,7 @@ add_survival_data_GSE6891 <- function(dataset) {
 }
 
 # Creates collection for gene names
-compile_genes <- function() {
+compile_genes <- function(minimum_population) {
   connection <- connect_mongo(collection_name = "genes")
   all_collections <- connection$run('{ "listCollections" : 1, "nameOnly" : true}')
   all_collections <- all_collections$cursor$firstBatch[,1]
@@ -186,8 +186,8 @@ compile_genes <- function() {
     genes_in_dataset <- data_connection$find(fields = '{"gene" : true, "_id" : false}')
     return(as.vector(genes_in_dataset))
   })
-  
-  gene_list <- unique(unlist(gene_list))
+  gene_list <- table(unlist(gene_list))
+  gene_list <- unique(names(gene_list)[gene_list >= minimum_population])
   for (x in gene_list) {
     str <- paste0('{"gene" :"', x, '"}')
     connection$insert(str)

@@ -8,12 +8,12 @@ selectingSingleGene <- list(
                      choices = sort(c("A1BG")))
     ),
     column(3,
-      selectInput("inputTest", label = "Select a testing format",
+      selectInput("inputTest", label = "Select a test for risk analysis",
                      choices = c("t-test", "wilcox", "anova"))
       ),
     column(2,
       div(
-        actionButton("geneSearchButton", "Evaluate Gene")
+        actionButton("geneSearchButton", "Evaluate Gene", style = 'margin-top:23px')
       )
     )
   )

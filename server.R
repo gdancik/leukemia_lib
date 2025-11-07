@@ -16,7 +16,7 @@ function(input, output, session) {
   
   m <- connect_mongo("genes")
   genes <- m$find()$gene
-  genes <- genes[order(genes)][15:length(genes)]
+  genes <- genes[order(genes)]
 
   geneButton <- observeEvent(input$geneSearchButton, {
     print("Calculating...")
@@ -30,6 +30,6 @@ function(input, output, session) {
   })
   
   updateSelectizeInput(session, "inputGene", choices = genes,
-                       selected = character(0), server = TRUE,
+                       selected = "A1BG", server = TRUE,
                        options = list(maxOptions = 20, placeholder = "Enter gene..."))
 }

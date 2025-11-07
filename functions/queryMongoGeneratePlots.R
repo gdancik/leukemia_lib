@@ -143,9 +143,9 @@ generate_boxplots <- function(data, gene_name, variable, method) {
     }
   
   ggplot(data, aes_string(x = variable, y = "expr", fill = variable)) + 
-    geom_boxplot() + theme_classic() + 
+    geom_boxplot() + theme_classic(base_size = 16) + 
     ggtitle(paste0(dataset, ":\n", test_label, p_label)) + 
-    labs(y = "Log Counts per Million", x = paste0(variable)) + 
+    labs(y = "Log Counts per Million", x = "") + 
     theme(legend.position = "none") +
     scale_fill_manual(values = c("poor" = "darkred", "intermediate" = "darkgrey", "favorable" = "lightblue"))
 }
@@ -218,10 +218,12 @@ generate_forestplot_data <- function(data) {
   
   forestplot_data <- data.frame(
     Dataset = dataset,
+    `...` = paste(rep(" ", 6), collapse = " "),
     n = coxph_test$n,
-    HR = 1 / exp(coxph_test$coefficients),
-    CI_low = 1 / exp(CI[2]),
-    CI_high = 1 / exp(CI[1])
+    HR = coxph_test$coefficients,
+    CI_low = CI[2],
+    CI_high = CI[1],
+    var = coxph_test$var[1]
   )
   rownames(forestplot_data) <- NULL
   return(forestplot_data)
@@ -256,39 +258,43 @@ query_mongo_forest <- function(gene_name, datasets = "all") {
   # Using forestploter package
   
   average <- weighted.mean(all_forestplot_data$HR, all_forestplot_data$n)
-  variance <- weighted.var(all_forestplot_data$HR,all_forestplot_data$n)
+  variance <- sum(all_forestplot_data$n**2*all_forestplot_data$var / (sum(all_forestplot_data$n)**2))
   
   all_forestplot_data[nrow(all_forestplot_data) + 1,] <-
-    c("Weighted Average", 
+    c("Weighted Avg",
+      paste(rep(" ", 6), collapse = " "),
       sum(all_forestplot_data$n), 
       average,
+      average + qnorm(.975)*sqrt(variance),
       average - qnorm(.975)*sqrt(variance),
-      average + qnorm(.975)*sqrt(variance))
+      0)
   
   all_forestplot_data$` ` <- paste(rep(" ", 20), collapse = " ")
   
-  all_forestplot_data$HR <- as.numeric(all_forestplot_data$HR)
-  all_forestplot_data$CI_low <- as.numeric(all_forestplot_data$CI_low)
-  all_forestplot_data$CI_high <- as.numeric(all_forestplot_data$CI_high)
+  all_forestplot_data$HR <- round(1 / exp(as.numeric(all_forestplot_data$HR)), 2)
+  all_forestplot_data$CI_low <- 1 / exp(as.numeric(all_forestplot_data$CI_low))
+  all_forestplot_data$CI_high <- 1 / exp(as.numeric(all_forestplot_data$CI_high))
   
   all_forestplot_data$`HR (95% CI)` <- 
-    sprintf("%.2f (%.2f to %.2f)", 
-            all_forestplot_data$HR, 
+    sprintf("(%.2f to %.2f)",
             all_forestplot_data$CI_low, 
             all_forestplot_data$CI_high)
   
   final_plot <-
     forest(
-    data = all_forestplot_data[,c(1:3,6:7)],
+    data = all_forestplot_data[,c(1:2,3:4, 8:9)],
     est = all_forestplot_data$HR,
     lower = all_forestplot_data$CI_low,
     upper = all_forestplot_data$CI_high,
     xlab = "Hazard Ratio",
-    ci_column = 4,
+    ci_column = 5,
     ref_line = 1,
-    xlim = c(0,3),
+    xlim = c(0,4),
     ticks_at = c(0.5, 1, 2, 3),
-    is_summary = c(rep(FALSE, nrow(all_forestplot_data) - 1), TRUE)
+    is_summary = c(rep(FALSE, nrow(all_forestplot_data) - 1), TRUE),
+    x_trans = "log",
+    theme = forest_theme(base_size = 30),
+    sizes = 1
   )
   
   final_plot <- edit_plot(final_plot,
@@ -300,5 +306,6 @@ query_mongo_forest <- function(gene_name, datasets = "all") {
   final_plot <- add_border(final_plot, part = "header",
                            row = 1,
                            where = "bottom")
-  return(final_plot)
+  final_plot
 }
+

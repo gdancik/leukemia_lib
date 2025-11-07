@@ -17,6 +17,8 @@ parser$add_argument("--db", default = "no",
                     help = "upload data to database (yes/no)")
 parser$add_argument("--genes", default = "yes",
                     help = "create collection for gene names (yes/no)")
+parser$add_argument("--min_pop", default = 2,
+                    help = "# of datasets for gene to be added to collection (>0)")
 
 args <- parser$parse_args()
 
@@ -53,5 +55,5 @@ if (args$clinical == "yes") {
 }
 
 if (args$genes == "yes") {
-  compile_genes()
+  compile_genes(args$min_pop)
 }
