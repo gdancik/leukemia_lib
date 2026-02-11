@@ -1,5 +1,5 @@
 
-source('functions/functions.R')
+source('functions/leukemia_lib/functions.R')
 
 # returns gene1 / (gene2 + gene3) if ratio = TRUE;
 # otherwise returns gene1 + gene2
@@ -102,7 +102,7 @@ getGeneFromPlatform <- function(X, gene1, PL, gene2 = NULL) {
     load('data/RData/GPL96.RData')
     PL <- GPL96
   } else if ('ENSEMBL' == PL) {
-    PL <- readRDS('data/ensemble.rds')
+    PL <- readRDS('data/additional_data/ensemble.rds')
   } else if ('GPL10558' == PL) {
     load('data/RData/GPL10558.RData')
     PL <- GPL10558
@@ -138,7 +138,7 @@ get_target <- function(gene1, gene2 = NULL, gene3 = NULL, sum = FALSE) {
   library(EnsDb.Hsapiens.v86)
   
   TARGET <- readRDS('data/target.rds')
-  PL <- readRDS('data/ensemble.rds')
+  PL <- readRDS('data/additional_data/ensemble.rds')
 
   x <- getGeneFromPlatform(TARGET$X, gene1, 'ENSEMBL')
   
@@ -389,7 +389,7 @@ get_all_genes <- function(ds) {
     return(r)
   } else if (ds == 'TARGET') {
     TARGET <- readRDS('data/target.rds')
-    PL <- readRDS('data/ensemble.rds')
+    PL <- readRDS('data/additional_data/ensemble.rds')
     genes <- get_genes_from_platform(rownames(TARGET$X), PL)
     return(genes)
   } else if (ds == 'BEAT_BMA') {
