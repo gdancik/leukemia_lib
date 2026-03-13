@@ -1,0 +1,58 @@
+---
+title: "Second_assigment"
+output: html_document
+date: "2026-02-18"
+
+params:
+  gene_1: "NFKBIA"
+  alt_gene1: NULL
+  
+  gene_2: "CXCL8"
+  alt_gene2: "IL8"
+
+#row =gene
+#colums =patients_ID
+---
+
+```{r}
+
+source("functions/leukemia_lib/getData.R")
+```
+
+```{r}
+ gene1_data <- get_all_data(params$gene_1) #get expression data 
+
+```
+
+```{r}
+gene2_data <- get_all_data(params$gene_2)
+alt_gene2_data <- get_all_data(params$alt_gene2)
+```
+```{r}
+calculate_cor <- function(g1, g2) { 
+  if (is.null(g1$X) || is.null(g2$X)) return(NA)
+  
+  x <- as.numeric(g1$X[1, ]) 
+  y <- as.numeric(g2$X[1, ])
+  
+  if (is.null(x) || is.null(y)) return(NA)
+  
+  cor(x, y, use = "complete.obs")
+}
+```
+
+
+```{r}
+for (nm in names(gene2_data)) {
+  if (is.null(gene2_data[[nm]]$X) && !is.null(alt_gene2_data[[nm]]$X)) {
+  gene2_data[[nm]] <- alt_gene2_data[[nm]]
+  }
+}
+
+new_variable <- Map(calculate_cor, gene1_data, gene2_data)
+print(new_variable)
+
+
+```
+
+
